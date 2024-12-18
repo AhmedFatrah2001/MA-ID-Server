@@ -1,0 +1,9 @@
+Flask==2.0.2
+python-dotenv==0.19.2
+PyJWT==2.3.0
+Werkzeug==2.0.2
+numpy==1.21.4
+opencv-python-headless==4.5.4.60
+mysql-connector-python==8.0.27
+ultralytics==8.0.0
+pytesseract==0.3.8
