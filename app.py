@@ -222,6 +222,7 @@ def verify_otp():
     }, SECRET_KEY, algorithm="HS256")
 
     return jsonify({
+        "user": { "user_id": user['id'], "username": user['username'], "email": user['email'], "created_at": user['created_at'] },
         "message": "Login successful!",
         "token": token
     })
