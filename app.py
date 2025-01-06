@@ -107,20 +107,24 @@ def login():
 def verify_otp():
     data = request.get_json()
 
-    if not data or not data.get('user_id') or not data.get('otp'):
-        return jsonify({"message": "User ID and OTP are required!"}), 400
+    if not data or not data.get('identifier') or not data.get('otp'):
+        return jsonify({"message": "Identifier (username or email) and OTP are required!"}), 400
 
-    user_id = data['user_id']
+    identifier = data['identifier']
     otp = int(data['otp'])
 
-    if user_id not in user_otps or user_otps[user_id] != otp:
-        return jsonify({"message": "Invalid OTP!"}), 401
+    # Find the user using their identifier
+    user = None
+    for user_id, user_otp in user_otps.items():
+        if user_otp == otp:
+            user = get_user_by_id(user_id)
+            if user and (user['username'] == identifier or user['email'] == identifier):
+                break
 
-    del user_otps[user_id]  # Remove OTP after successful verification
-
-    user = get_user_by_id(user_id)
     if not user:
-        return jsonify({"message": "User not found!"}), 404
+        return jsonify({"message": "Invalid identifier or OTP!"}), 401
+
+    del user_otps[user['id']]  # Remove OTP after successful verification
 
     token = jwt.encode({
         "user_id": user['id'],
@@ -133,6 +137,7 @@ def verify_otp():
         "message": "Login successful!",
         "token": token
     })
+
 
 @app.route('/scan', methods=['POST'])
 @token_required
