@@ -202,8 +202,12 @@ def verify_otp():
     for user_id, user_otp in user_otps.items():
         if user_otp == otp:
             user = get_user_by_id(user_id)
+            print(user_otp)
+            print(user)
             if user and (user['username'] == identifier or user['email'] == identifier):
                 break
+            else:
+                return jsonify({"message": "Invalid identifier or OTP!"}), 401
 
     if not user:
         return jsonify({"message": "Invalid identifier or OTP!"}), 401
@@ -214,7 +218,7 @@ def verify_otp():
         "user_id": user['id'],
         "username": user['username'],
         "email": user['email'],
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
     }, SECRET_KEY, algorithm="HS256")
 
     return jsonify({
