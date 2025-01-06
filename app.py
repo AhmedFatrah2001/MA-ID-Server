@@ -1,3 +1,4 @@
+from email.mime.multipart import MIMEMultipart
 from flask import Flask, request, jsonify
 import jwt
 import datetime
@@ -30,21 +31,104 @@ user_otps = {}
 zone_detector = ZoneDetector()
 ocr_processor = OCRProcessor()
 
-# Helper function to send OTP email
 def send_otp_email(email, otp):
     try:
-        msg = MIMEText(f"Your OTP is: {otp}")
-        msg['Subject'] = 'Your OTP Code'
+        # Create message container - the correct MIME type is multipart/alternative
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = 'Your Verification Code'
         msg['From'] = EMAIL_USER
         msg['To'] = email
 
+        # Create the HTML version of your message
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+            <head>
+            <style>
+            body {{
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            }}
+            .container {{
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            }}
+            .header {{
+            background-color: #00bf63;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+            }}
+            .content {{
+            background-color: white;
+            padding: 30px;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }}
+            .otp-code {{
+            font-size: 38px;
+            font-weight: bold;
+            color: #00bf63;
+            text-align: center;
+            letter-spacing: 10px;
+            margin: 20px 0;
+            }}
+            .footer {{
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 12px;
+            }}
+            </style>
+            </head>
+            <body>
+            <div class="container">
+            <div class="header">
+            <h1>Verification Code</h1>
+            </div>
+            <div class="content">
+            <p>Hello,</p>
+            <p>Your verification code is:</p>
+            <div class="otp-code">{otp}</div>
+            <p>This code will expire in 10 minutes. If you didn't request this code, please ignore this email.</p>
+            <p>Best regards,<br>MA-ID-Scanner Team</p>
+            </div>
+            <div class="footer">
+            <p>This is an automated message, please do not reply to this email.</p>
+            <p>If you need assistance, please contact our support team at <a href="mailto:fatrah.ahmed@gmail.com">fatrah.ahmed@gmail.com</a>.</p>
+            </div>
+            </div>
+            </body>
+        </html>
+        """
+
+        # Create both plain text and HTML versions of the message
+        text = f"Your verification code is: {otp}\n\nThis code will expire in 10 minutes."
+        
+        # Record the MIME types
+        part1 = MIMEText(text, 'plain')
+        part2 = MIMEText(html, 'html')
+
+        # Attach parts into message container
+        # According to RFC 2046, the last part of a multipart message is best and preferred
+        msg.attach(part1)
+        msg.attach(part2)
+
+        # Send the message via SMTP server
         with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
             server.starttls()
             server.login(EMAIL_USER, EMAIL_PASS)
             server.sendmail(EMAIL_USER, email, msg.as_string())
-        print("OTP email sent successfully.")
+            print("OTP email sent successfully.")
+            
     except Exception as e:
         print(f"Failed to send OTP email: {e}")
+        raise
 
 # JWT Token decorator
 def token_required(f):
