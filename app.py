@@ -218,7 +218,7 @@ def verify_otp():
         "user_id": user['id'],
         "username": user['username'],
         "email": user['email'],
-        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
+        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(weeks=1)
     }, SECRET_KEY, algorithm="HS256")
 
     return jsonify({
