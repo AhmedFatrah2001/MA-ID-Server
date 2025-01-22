@@ -16,7 +16,7 @@ jobs:
 
       - name: Run SonarScanner
         run: |
-          sonar-scanner-4.8.0.2856-windows/bin/sonar-scanner.bat ^
+          sonar-scanner-6.2.1.4610\bin\sonar-scanner.bat ^
             -Dsonar.projectKey=AhmedFatrah2001_MA-ID-Server_5807ab0b-fa84-43a2-a407-5438da6d2e18 ^
             -Dsonar.sources=. ^
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} ^
