@@ -5,23 +5,19 @@ on:
     branches:
       - main
 
-
 jobs:
   build:
     name: Build and analyze
     runs-on: self-hosted
-    
+
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: sonarsource/sonarqube-scan-action@v3
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      # If you wish to fail your job when the Quality Gate is red, uncomment the
-      # following lines. This would typically be used to fail a deployment.
-      # - uses: sonarsource/sonarqube-quality-gate-action@master
-      #   timeout-minutes: 5
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run SonarScanner
+        run: |
+          sonar-scanner-4.8.0.2856-windows/bin/sonar-scanner.bat ^
+            -Dsonar.projectKey=AhmedFatrah2001_MA-ID-Server_5807ab0b-fa84-43a2-a407-5438da6d2e18 ^
+            -Dsonar.sources=. ^
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} ^
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
